@@ -1,0 +1,167 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+<h3>Home for registered users</h3>
+<p>
+    You are currently at home page for registered users.
+    Following calculation apps are available.
+</p>
+
+<hr>
+<!--<a class="btn btn-primary" href="{% url 'add' %}">add calculation app</a>
+<a class="btn btn-primary" href="{% url 'sub' %}">subtraction calculation app</a>-->
+
+
+<div class="container">
+
+    <div class="row">
+        
+        
+        <div class="col text-center">
+            <h4>SOM</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rd_torque' %}">RD Torque</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_presstorque_url_name' %}">RW Presstorque</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_powerscrew_url_name' %}">RW Power Screw</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_shaftstr_url_name' %}">RW Shaft strength</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_bed_url_name' %}">RW Bed Stress & deflection </a>
+            </div>
+            <hr>
+            
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_crown_url_name' %}">RW Crown Stress & deflection </a>
+            </div>
+            <hr>
+            
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_slide_url_name' %}">RW Slide Stress & deflection </a>
+            </div>
+            <hr>
+            
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_key_url_name' %}">RW key calculations </a>
+            </div>
+            <hr>
+            
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_sphcontact_url_name' %}">RW Spherical Contact calculations </a>
+            </div>
+            <hr>
+
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_cylcontact_url_name' %}">RW Cylindrical Contact calculations </a>
+            </div>
+            <hr>
+        </div>
+
+
+        <div class="col text-center">
+            <h4>Kinematics</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'ecc_drive' %}">Ecc Drive</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'flywheel' %}">Flywheel energy</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'link_drive' %}">Link Drive</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_pressspeed_url_name' %}">RW Pressspeed</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_ld_url_name' %}">RW Link Drive Press</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'draglink_url_name' %}">Draglink</a>
+            </div>
+            <hr>
+        </div>
+        
+        
+        <div class="col text-center">
+            <h4>Servo</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'servo345cv' %}">Servo 345CV</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'servo345' %}">Servo 345</a>
+            </div>
+            <hr>
+        </div>
+        
+        
+        <div class="col text-center">
+            <h4>Gears</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_gear_url_name' %}">RW Gear</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_gearstrength_url_name' %}">RW Gear Strength</a>
+            </div>
+            <hr>
+        </div>
+        
+        
+        <div class="col text-center">
+            <h4>Fluid</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_bush_url_name' %}">RW Hydrodynamic Bush Calculations</a>
+            </div>
+            <hr>
+        </div>
+        
+        
+        <div class="col text-center">
+            <h4>General</h4>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'block_weight_url_name' %}">Block weight and inertia</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_weight_url_name' %}">RW Weight</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_inertia_url_name' %}">RW Inertia</a>
+            </div>
+            <hr>
+            <div class="container">
+                <a class="btn btn-primary" href="{% url 'rw_thread_url_name' %}">RW Metric thread</a>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+{% endblock content %}

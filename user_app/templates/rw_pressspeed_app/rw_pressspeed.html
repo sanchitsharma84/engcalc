@@ -1,0 +1,72 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_pressspeed_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise press speed calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                <div class="col text-center">
+                    <h6>Stroke (mm)</h6>
+                </div>
+                <div class="col text-center">
+                    <h6>SPM</h6>
+                </div>
+                <div class="col text-center">
+                    <h6>CA (deg)</h6>
+                </div>
+                <div class="col text-center">
+                    <h6>FBOS (mm)</h6>
+                </div>
+                <div class="col text-center">
+                    <h6>Velocity (mm/s)</h6>
+                </div>
+            </div>
+
+            <div class="row row-cols-6">
+                {% for this_form_in in form_in_lst %}
+                {{this_form_in}} 
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Filling instruction</b></h6>
+    <ul>
+        <li>Calculation is for eccentric drive press</li>
+        <li>CA is Crank angle with vertical axis. TDC is 0 and BDC is 180 degree</li>
+        <li>FBOS is Slide position from bottom of stroke</li>
+        <li>Velocity is Slide linear velocity at given crank angle</li>
+
+
+    </ul>
+</div>
+<!-- container ends here -->
+
+{% endblock %}

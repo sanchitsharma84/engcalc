@@ -1,0 +1,275 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Rated distance & torque calculations</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="rd_torque" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                                
+                            </form>
+                            <hr>
+                            <h6>F (press force) in ton</h6>
+                            <h6>R (eccentricity) in mm</h6>
+                            <h6>S (rated distance) in mm</h6>
+                            <h6>L (con rod length) in mm</h6>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+                            <h6>Alp (rated angle) in deg</h6>
+                            <h6>Beta (conrod angle) in deg</h6>
+                            <h6>T (Ecc gear torque) in Nm</h6>
+                        </div>
+                    </div>
+                </div>
+                <!-- local column ends here -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="f_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var f_th2_parsed_data = {{ f_th2_data|safe }};
+                                var f_th2_chart_data = f_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("f_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var ctx = chart.ctx;
+                                          ctx.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          ctx.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          ctx.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Press Force Vs CA',
+                                            data: f_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Press Force Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 110,
+                                                max: 180,
+                                                stepSize: 10
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                    //beginAtZero: true, this is to be verified
+                                                    min: 0,
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Press Force (ton)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="f_fbos_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var f_fbos_parsed_data = {{ f_fbos_data|safe }};
+                                var f_fbos_chart_data = f_fbos_parsed_data.xy_data;
+                                var ctx = document.getElementById("f_fbos_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var ctx = chart.ctx;
+                                          ctx.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          ctx.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          ctx.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Press Force Vs FBOS',
+                                            data: f_fbos_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Press Force Vs FBOS'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                    //beginAtZero: true, this is to be verified
+                                                    min: 0,
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Press Force (ton)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+
+
+            </div>
+            <!-- row class ends here -->
+
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}
+
+
+
+
+

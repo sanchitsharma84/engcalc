@@ -1,0 +1,79 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_gearstrength_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise Gear strenth calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>1. This program roughly calculates pinion torque in a gear-pinion mesh</li>
+        <li>2. Program works on linear interpolation only</li>
+        <li>3. Few set points are calculated using actual program</li>
+        <li>4. Based on these setpoints, user defined points are interpolated to find torque</li>
+        <li>5. This program works for module 6 to 25 only</li>
+        <li>6. Face width is considered 15 time of module</li>
+        <li>7. Pressure angle of 20 deg is considered</li>
+        <li>8. Helix angle set points are 0, 10, 20 and 30 deg</li>
+        <li>9. Gear ratio set points are 3 and 5</li>
+        <li>10. Pinion teeth set points are 17 and 31</li>
+        <li>11. +0.3 correction factor in pinon and -0.3 in gear is considered</li>
+        <li>12. Results are accurate if input values are near set points </li>
+        <li>13. There is no option to input correction factor</li>
+        <li>14. Pinion material EN24 UTS 890MPa, Endurance 310 MPa and Surface hardness 255 HB</li>
+        <li>15. Gear material IS 2708 casting with UTS 690 MPa, Endurance 235 MPa and Surface hardness 210 HB</li>
+        <li>16. In case of gear ratios < 2, it is recommended to use EN24 gear for which output of this program is not valid</li>
+        <li>17. Gear and Pinion surfaces are not hardened and not ground</li>
+        <li>18. Gear and Pinion quality class 7 is considered</li>
+        <li>19. Calculations are done on 100 rpm gear speed</li>
+        <li>20. When z is small, failure criterion is pitting, when z is large (~27 above), failure criterion is bending</li>
+        <li>21. Above effect is more pronounced in helical gears</li>
+        <li>22. If your gear is driving another gear, FOS is reduced by 13%. To avoid failure, reduce torque by 13%</li>
+        <li>23. Above effect is valid in bending only, there is no effect on FOS in pitting</li>
+        <li>24. For gears rotating in both direction, FOS is reduced by 20%. So reduce torque by 20%</li>
+        <li>25. For both direction rotation and gear driving another gear, FOS is reduced by 30%. So to avoid failure reduce torque by 30%</li>
+
+
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}

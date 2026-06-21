@@ -1,0 +1,515 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Flywheel energy</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="flywheel" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                                
+                            </form>
+                            <hr>
+                            <h6>pcd_fw = flywheel pcd in mm</h6>
+                            <h6>pcd_pu = pulley pcd in mm</h6>
+                            <h6>gr_press = press gear ratio</h6>
+                            <h6>pow_mot = motor power in kW</h6>
+                            <h6>n_mot_rtd = rated rpm of motor</h6>
+                            <h6>j_mot = motor inertia in kgm2</h6>
+                            <h6>j_fw = flywheel inertia in kgm2</h6>
+                            <h6>th_form = angle of forming in deg</h6>
+                            <h6>spm_min = min spm</h6>
+                            <h6>spm_max = max spm</h6>
+                            <h6>dw_pc = system efficiency</h6>
+                            <h6>eff = system efficiency</h6>
+                            <h6>sspm1 = sspm 1</h6>
+                            <h6>sspm2 = sspm2</h6>
+                            <h6>trq_ds = driveshaft's design torque in Nm</h6>
+                            <h6>energy_limit = user defined limit of energy deliever capacity</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+
+                            <h6>n_mot_min = min rpm of motor</h6>
+                            <h6>n_mot_max = max rpm of motor</h6>
+                            <h6>npc_mot_min = min speed as a % of motor rated speed</h6>
+                            <h6>npc_mot_max = max speed as a % of motor rated speed</h6>
+                            <h6>v_belt = belt linear speed in m/s</h6>
+                            <h6>n_fw_max = flywheel max speed</h6>
+                            <h6>spm_press_bas = base spm of press</h6>
+                            <h6>energy_max_cap = max energy limit</h6>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="eng_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var eng_parsed_data = {{ eng_data|safe }};
+                                var eng_chart_data = eng_parsed_data.xy_data;
+                                var ctx = document.getElementById("eng_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Energy Vs spm',
+                                            data: eng_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FF0000", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Energy Vs spm'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'spm'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Energy (kJ)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="dw_pc_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var dw_pc_parsed_data = {{ dw_pc_data|safe }};
+                                var dw_pc_chart_data = dw_pc_parsed_data.xy_data;
+                                var ctx = document.getElementById("dw_pc_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: '%reduction Vs spm',
+                                            data: dw_pc_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#800080", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: '% reduction Vs spm'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'spm'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: '% reduction'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="min_spm_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var min_spm_parsed_data = {{ min_spm_data|safe }};
+                                var max_spm_parsed_data = {{ max_spm_data|safe }};
+
+                                var min_spm_chart_data = min_spm_parsed_data.xy_data;
+                                var max_spm_chart_data = max_spm_parsed_data.xy_data;
+
+                                var ctx = document.getElementById("min_spm_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Min spm Vs spm',
+                                            data: min_spm_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#00ff00", // for main line color
+                                        },
+                                        {
+                                            label: 'Max spm Vs spm',
+                                            data: max_spm_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Min-Max spm Vs spm'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'spm'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Min-Max spm'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: true,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="eng_sspm_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var eng1_parsed_data = {{ eng1_data|safe }};
+                                var eng2_parsed_data = {{ eng2_data|safe }};
+
+                                var eng1_chart_data = eng1_parsed_data.xy_data;
+                                var eng2_chart_data = eng2_parsed_data.xy_data;
+
+                                var ctx = document.getElementById("eng_sspm_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Energy @ sspm1 Vs spm',
+                                            data: eng1_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FF8C00", // for main line color
+                                        },
+                                        {
+                                            label: 'Energy @ sspm2 Vs spm',
+                                            data: eng2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Energy Vs spm'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'spm'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Energy (kJ)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: true,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+                
+                
+
+                
+
+
+
+
+                
+            </div>
+            <!-- row class ends here -->
+
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}

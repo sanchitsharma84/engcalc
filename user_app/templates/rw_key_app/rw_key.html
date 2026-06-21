@@ -1,0 +1,60 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_key_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise key calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>dia is shaft dia in mm</li>
+        <li>qty is number of keys</li>
+        <li>len is length of 1 key in mm</li>
+        <li>width is width of key in mm</li>
+        <li>height is height of key in mm</li>
+        <li>dep shft is depth of keyway in shaft in mm</li>
+        <li>dep hub is depth of keyway in hub in mm</li>
+        <li>Trq is torque transmission capacity of keyed connection</li>
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}

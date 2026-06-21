@@ -1,0 +1,1145 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Drag Link Kinematics</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="link_drive" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                            </form>
+                            <hr>
+                            <h6>a (link length) in mm</h6>
+                            <h6>b (link length) in mm</h6>
+                            <h6>c (link length) in mm</h6>
+                            <h6>d (link length) in mm</h6>
+                            <h6>f (link length) in mm</h6>
+                            <h6>th2 (ecc gear angle) in deg</h6>
+                            <h6>tht (link angle) in deg</h6>
+                            <h6>g (link length) in mm</h6>
+                            <h6>h (link length) in mm</h6>
+                            <h6>m (link length) in mm</h6>
+                            <h6>w2 (ecc gear speed) in rad/s</h6>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+                            <h6>stroke in mm</h6>
+                            <h6>th2_tdc_deg (TDC angle) in deg</h6>
+                            <h6>th2_bdc_deg (BDC angle) in deg</h6>
+                            <h6>th3 in deg</h6>
+                            <h6>th4 in deg</h6>
+                            <h6>th7 in deg</h6>
+                            <h6>th8 in deg</h6>
+                            <h6>fbos in mm</h6>
+                            <h6>w3 in rad/s</h6>
+                            <h6>w4 in rad/s</h6>
+                            <h6>w7 in rad/s</h6>
+                            <h6>w8 in rad/s</h6>
+                            <h6>v (slide vel) in mm/s</h6>
+                            <h6>th2_rd_deg (rated angle at rd) in mm</h6>
+                            <h6>trq_eg_rtd (Required torque at ecc gear) in Nm</h6>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- Image column start -->
+                <div class="col-sm-12">
+                    <div class="mt-4 col-sm-6 mx-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <img src="{% static 'link_drive_app/ld_img.jpg' %}" class="img-fluid" alt="Responsive image">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- image column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="fbos_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var fbos_th2_parsed_data = {{ fbos_th2_data|safe }};
+                                var fbos_th2_chart_data = fbos_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("fbos_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'FBOS Vs CA',
+                                            data: fbos_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'FBOS Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+                <!--
+                    th2_deg_cust_lst
+                    fbos_cust_lst
+                -->
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="fbos_th2_cust_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var th2_deg_cust_lst_parsed_data = {{ th2_deg_cust_lst|safe }};
+                                var fbos_cust_lst_parsed_data = {{ fbos_cust_lst|safe }};
+
+                                var ctx = document.getElementById("fbos_th2_cust_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'line',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        labels: th2_deg_cust_lst_parsed_data,
+                                        datasets: [{
+                                            label: 'FBOS Vs CA',
+                                            data: fbos_cust_lst_parsed_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'FBOS Vs Crank Angle (for customers)'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30,
+                                                //precision: 0,
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA [cust coordinate sys] (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_th2_cust_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var th2_deg_cust_lst_parsed_data = {{ th2_deg_cust_lst|safe }};
+                                var v_cust_lst_parsed_data = {{ v_cust_lst|safe }};
+
+                                var ctx = document.getElementById("v_th2_cust_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'line',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        labels: th2_deg_cust_lst_parsed_data,
+                                        datasets: [{
+                                            label: 'Vel Vs CA',
+                                            data: v_cust_lst_parsed_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Vel Vs Crank Angle (for customers)'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30,
+                                                //precision: 0,
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA [cust coordinate sys] (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Vel (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="acc_th2_cust_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var th2_deg_cust_lst_parsed_data = {{ th2_deg_cust_lst|safe }};
+                                var acc_cust_lst_parsed_data = {{ acc_cust_lst|safe }};
+
+                                var ctx = document.getElementById("acc_th2_cust_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'line',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        labels: th2_deg_cust_lst_parsed_data,
+                                        datasets: [{
+                                            label: 'Acc Vs CA',
+                                            data: acc_cust_lst_parsed_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Acc Vs Crank Angle (for customers)'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30,
+                                                //precision: 0,
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA [cust coordinate sys] (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Acc (m/s2)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_th2_parsed_data = {{ v_th2_data|safe }};
+                                var v_th2_chart_data = v_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Vel Vs CA',
+                                            data: v_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Vel Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_th2_half_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_th2_half_parsed_data = {{ v_th2_half_data|safe }};
+                                var v_th2_half_chart_data = v_th2_half_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_th2_half_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Downstroke Vel Vs CA',
+                                            data: v_th2_half_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Downstroke Vel Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Downstroke velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_fbos_half_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_fbos_half_parsed_data = {{ v_fbos_half_data|safe }};
+                                var v_fbos_half_chart_data = v_fbos_half_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_fbos_half_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Downstroke Vel Vs FBOS',
+                                            data: v_fbos_half_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Downstroke Vel Vs FBOS'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Downstroke velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_fbos_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_fbos_parsed_data = {{ v_fbos_data|safe }};
+                                var v_fbos_chart_data = v_fbos_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_fbos_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Velocity Vs FBOS',
+                                            data: v_fbos_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Velocity Vs FBOS'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                    //beginAtZero: true, this is to be verified
+                                                    min: 0,
+                                                    //max: 360,
+                                                    //stepSize: 30
+                                                    },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="fbos_th2_half_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var fbos_th2_half_parsed_data = {{ fbos_th2_half_data|safe }};
+                                var fbos_th2_half_chart_data = fbos_th2_half_parsed_data.xy_data;
+                                var ctx = document.getElementById("fbos_th2_half_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Downstroke FBOS Vs CA',
+                                            data: fbos_th2_half_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Downstroke FBOS Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Downstroke FBOS (mm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="pf_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var pf_th2_parsed_data = {{ pf_th2_data|safe }};
+                                var pf_th2_chart_data = pf_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("pf_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Press force Vs CA',
+                                            data: pf_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Press force Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                    //beginAtZero: true, this is to be verified
+                                                    min: 0,
+                                                    //max: 360,
+                                                    //stepSize: 30
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Press force (Ton)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="mt-4 col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="pf_fbos_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var pf_fbos_parsed_data = {{ pf_fbos_data|safe }};
+                                var pf_fbos_chart_data = pf_fbos_parsed_data.xy_data;
+                                var ctx = document.getElementById("pf_fbos_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var ctx = chart.ctx;
+                                            ctx.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            ctx.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            ctx.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Press force Vs FBOS',
+                                            data: pf_fbos_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Press force Vs FBOS'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                ticks: {
+                                                    //beginAtZero: true, this is to be verified
+                                                    min: 0,
+                                                    //max: 360,
+                                                    //stepSize: 30
+                                                    },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Press force (Ton)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                
+
+                
+
+            </div>
+            <!-- row class ends here -->
+
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}

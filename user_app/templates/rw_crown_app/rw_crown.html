@@ -1,0 +1,74 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_crown_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise Crown Calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>TF x is top flange x (width) in mm</li>
+        <li>TF y is top flange y (thk) in mm</li>
+        <li>BF x is bottom flange x (width) in mm</li>
+        <li>BF y is botom flange y (thk) in mm</li>
+        <li>Web x is web x (thk) in mm</li>
+        <li>Web y is web y (height) in mm</li>
+        <li>TR x is top reinforcement x (width) in mm</li>
+        <li>TR y is top reinforcement y (thk) in mm</li>
+        <li>BR x is bottom reinforcement x (width) in mm</li>
+        <li>BR y is bottom reinforcement y (thk) in mm</li>
+        <li>E is Young's modulus in MPa</li>
+        <li>G is Shear modulus in MPa</li>
+        <li>Force is load on beam Ton</li>
+        <li>CD is center distance between tie rods in mm</li>
+        <li>sus CD is center distance between suspensions in mm</li>
+        <li>area is x-sec area of beam in mm2</li>
+        <li>weight is beam weight in kg</li>
+        <li>sb is bending stress in MPa</li>
+        <li>ss is shear stress in MPa</li>
+        <li>m def is deflection due to bending moment in mm</li>
+        <li>s def is deflection due to shear in mm</li>
+        <li>total def is in mm/m due to both shear and bending moment</li>
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}

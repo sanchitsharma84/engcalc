@@ -1,0 +1,83 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Block weight and inertia</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="block_weight_url" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                                
+                            </form>
+                            <hr>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+                        </div>
+                    </div>
+                </div>
+                <!-- local column ends here -->
+
+            </div>
+            <!-- row class ends here -->
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+
+
+
+
+
+
+
+
+
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}
+
+
+
+
+

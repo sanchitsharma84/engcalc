@@ -1,0 +1,25 @@
+from django import forms
+
+class FormOutput(forms.Form):
+    trq = forms.FloatField(label="stroke (mm)")
+    v_at_rd = forms.FloatField(label="Crank agle at TDC (deg)")
+    th2_bdc_deg = forms.FloatField(label="Crank agle at BDC (deg)")
+    fb_max = forms.FloatField(label="Angle th3 (deg)")
+    ds_trq_unit_out = forms.FloatField(label="Angle th4 (deg)")
+    dp_rkr = forms.FloatField(label="Angle th7 (deg)")
+    w_bush_rkr = forms.FloatField(label="Angle th (deg)")
+    d_cs = forms.FloatField(label="FBOS (mm)")
+    gear_bore_dia = forms.FloatField(label="w3 (rad/s)")
+    d_in_clr_gear = forms.FloatField(label="w4 (rad/s)")
+    cc_arm_thk = forms.FloatField(label="w7 (rad/s)")
+    w_bush_d_s = forms.FloatField(label="w8 (rad/s)")
+    w_bush_gear = forms.FloatField(label="Slide velocity (mm/s)")
+    w_gear_body = forms.FloatField(label="Crank angle at rated dist (deg)")
+    w_trq_unit = forms.FloatField(label="Ecc gear torque (Nm)")
+    len_d_s = forms.FloatField(label="Ecc gear torque (Nm)")
+    xxxxxx = forms.FloatField(label="Ecc gear torque (Nm)")
+    xxxxxx = forms.FloatField(label="Ecc gear torque (Nm)")
+    xxxxxx = forms.FloatField(label="Ecc gear torque (Nm)")
+    xxxxxx = forms.FloatField(label="Ecc gear torque (Nm)")
+    xxxxxx = forms.FloatField(label="Ecc gear torque (Nm)")
+

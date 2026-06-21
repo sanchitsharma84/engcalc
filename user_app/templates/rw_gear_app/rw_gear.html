@@ -1,0 +1,81 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_gear_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise gear calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- <div class="row row-cols-14">
+                <div class="col text-center">
+                </div>
+                <div class="col text-center">
+                </div>
+                <div class="col text-center">
+                </div>
+                <div class="col text-center">
+                </div>
+            </div> -->
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Filling instruction</b></h6>
+    <ul>
+        <li>All dimensions in mm, angles in degrees</li>
+        <li>Pressure angle is 20 degrees</li>
+        <li>m - normal module</li>
+        <li>helix - helix angle</li>
+        <li>zp - No. of teeth in pinion</li>
+        <li>xp - correction factor in pinion. It is generally positive in pinion</li>
+        <li>zg - No. of teeth in gear</li>
+        <li>xg - correction factor in gear. It is generally negative in gear</li>
+        <li>pcd_p - pcd of pinion</li>
+        <li>pcd_g - pcd of gear</li>
+        <li>w_pcd_p - working pcd of pinion</li>
+        <li>w_pcd_g - working pcd of gear</li>
+        <li>od_p - OD of pinion</li>
+        <li>od_g - OD of gear</li>
+        <li>root_d_p - Root dia of pinion</li>
+        <li>root_d_g - Root dia of gear</li>
+        <li>cd - center distance</li>
+
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}

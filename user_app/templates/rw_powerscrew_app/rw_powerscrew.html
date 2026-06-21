@@ -1,0 +1,59 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_powerscrew_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise Power Screw Calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<!-- <div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>w is load in ton</li>
+        <li>dm is mean screw dia in mm</li>
+        <li>dmc is mean collar dia in mm</li>
+        <li>l is lead in mm</li>
+        <li>mus is screw friction (cof)</li>
+        <li>muc is collar friction (cof)</li>
+        <li>th is half screw angle in deg</li>
+    </ul>
+</div> -->
+
+<!-- container ends here -->
+
+{% endblock %}

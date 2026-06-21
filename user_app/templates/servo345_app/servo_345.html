@@ -1,0 +1,617 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Servo 345cv</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="servo345" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                                
+                            </form>
+                            <hr>
+                            <h6>s = stroke in mm</h6>
+                            <h6>t = time for stroke in s</h6>
+                            <h6>d_pu = pulley pcd in mm</h6>
+                            <h6>m = moving mass in kg</h6>
+                            <h6>cof = coefficient of friction</h6>
+                            <h6>f_res = any other resisting force opposing motion in N</h6>
+                            <h6>j_pu = pulley inertia in kgm2 (individual)</h6>
+                            <h6>j_mot = motor inertia in kgm2 (individual)</h6>
+                            <h6>j_gb = gearbox inertia in kgm2 at its input (individual)</h6>
+                            <h6>gr = gear ratio of gearbox</h6>
+                            <h6>t_idle = idle time after motion in s</h6>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+                            <h6>t_mot_rms = motor rms torque in Nm</h6>
+                            <h6>t_mot_pk = motor peak torque in Nm</h6>
+                            <h6>n_mot_avg = motor avg rpm</h6>
+                            <h6>n_mot_pk = motor peak rpm</h6>
+                            <h6>a_pk = peak linear acceleration in m/s2</h6>
+                            <h6>v_pk = peak linear velocity in mm/s</h6>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="mot_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var mot_rtd_pos_parsed_data = {{ mot_rtd_pos_data|safe }};
+                                var mot_max_pos_parsed_data = {{ mot_max_pos_data|safe }};
+                                var mot_rtd_neg_parsed_data = {{ mot_rtd_neg_data|safe }};
+                                var mot_max_neg_parsed_data = {{ mot_max_neg_data|safe }};
+                                var mot_trq_n_parsed_data = {{ mot_trq_n_data|safe }};
+                                var rms_avg_n_parsed_data = {{ rms_avg_n_data|safe }};
+
+                                var mot_rtd_pos_chart_data = mot_rtd_pos_parsed_data.xy_data;
+                                var mot_max_pos_chart_data = mot_max_pos_parsed_data.xy_data;
+                                var mot_rtd_neg_chart_data = mot_rtd_neg_parsed_data.xy_data;
+                                var mot_max_neg_chart_data = mot_max_neg_parsed_data.xy_data;
+                                var mot_trq_n_chart_data = mot_trq_n_parsed_data.xy_data;
+                                var rms_avg_n_chart_data = rms_avg_n_parsed_data.xy_data;
+
+                                var ctx = document.getElementById("mot_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                            var context = chart.ctx;
+                                            context.save();
+                                            var image = new Image();      
+                                            image.src = "{% static 'user_app/my_logo.png' %}";      
+                                            imageSize = 100;
+                                            context.drawImage(image, 
+                                            chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                            imageSize, imageSize * 0.54);
+                                            context.restore();
+                                        }
+                                        }],
+                                    data: {
+                                        datasets: [
+                                        {
+                                            label: '+ve rated',
+                                            data: mot_rtd_pos_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FF8C00", // for main line color
+                                            lineTension: 0, 
+                                        },
+                                        {
+                                            label: '+ve max',
+                                            data: mot_max_pos_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FF0000", // for main line color
+                                            lineTension: 0, 
+                                        },
+                                        {
+                                            label: '-ve rated',
+                                            data: mot_rtd_neg_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#DAA520", // for main line color
+                                            lineTension: 0, 
+                                        },
+                                        {
+                                            label: '-ve max',
+                                            data: mot_max_neg_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FF6347", // for main line color
+                                            lineTension: 0, 
+                                        },
+                                        {
+                                            label: 'motor torque',
+                                            data: mot_trq_n_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#B22222", // for main line color
+                                            //lineTension: 0, 
+                                        },
+                                        {
+                                            label: 'rms point',
+                                            data: rms_avg_n_chart_data,
+                                            //pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#8B008B", // for main line color
+                                            //lineTension: 0, 
+                                        },
+                                        ],
+                                        
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Motor torque vs rpm'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'rpm'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                //ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                //min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                //},
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Torque (Nm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: true,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+                
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="s_time_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var s_time_parsed_data = {{ s_time_data|safe }};
+                                var s_time_chart_data = s_time_parsed_data.xy_data;
+                                var ctx = document.getElementById("s_time_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Stroke Vs Time',
+                                            data: s_time_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#DC143C", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Stroke Vs Time'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Time (ms)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Stroke (mm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_time_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_time_parsed_data = {{ v_time_data|safe }};
+                                var v_time_chart_data = v_time_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_time_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Velocity Vs Time',
+                                            data: v_time_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#000080", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Velocity Vs Time'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Time (ms)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="a_time_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var a_time_parsed_data = {{ a_time_data|safe }};
+                                var a_time_chart_data = a_time_parsed_data.xy_data;
+                                var ctx = document.getElementById("a_time_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Acceleration VsTime',
+                                            data: a_time_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Acceleration VsTime'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Time (ms)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Acceleration (m/s2)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="trq_mot_time_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var trq_mot_time_parsed_data = {{ trq_mot_time_data|safe }};
+                                var trq_mot_time_chart_data = trq_mot_time_parsed_data.xy_data;
+                                var ctx = document.getElementById("trq_mot_time_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Motor Torque Vs Time',
+                                            data: trq_mot_time_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#800080", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Motor Torque Vs Time'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                //max: 360,
+                                                //stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Time (ms)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Motor Torque (Nm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+                
+
+
+
+
+                
+            </div>
+            <!-- row class ends here -->
+
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}

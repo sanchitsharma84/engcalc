@@ -1,0 +1,64 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_ld_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise LD Calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>LD sketch is LHS link with outward rocker (thru upright)</li>
+        <li>Counter clockwise direction is considered as positive for angle rotation</li>
+        <li>When crank angle = 0, slide in near mid stroke.</li>
+        <li>if th2 increases from 0 deg, slide moves towards TDC.</li>
+        <li>TDC is near 49 deg. BDC is 270 deg</li>
+        <li>Pf is press force in ton</li>
+        <li>Stk is stroke in mm</li>
+        <li>RD is rated diatance in mm</li>
+        <li>CA is crank angle in degrees</li>
+        <li>Teg is Ecc gear torque in Nm considering 1 suspension and gear only</li>
+        <li>fbos is slide position from bottom of stroke in mm</li>
+        <li>vel is slide velocity in mm/s</li>
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}

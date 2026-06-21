@@ -1,0 +1,352 @@
+{% extends 'user_app/base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container">
+    <hr>
+    <div class="card border-dark mb-3">
+        <div class="card-header">
+            <h3>Eccentric drive kinematics</h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+
+                            <form action="ecc_drive" method='POST'>
+                                <legend>
+                                    Input
+                                  </legend>
+                                  
+                                {% csrf_token %}
+                                {{form_input|crispy}}
+                                <br>
+                                <input type="submit" class="btn btn-primary">
+                            </form>
+                            <hr>
+                            <h6>A (eccentricity) in mm</h6>
+                            <h6>B (conrod length) in mm</h6>
+                            <h6>Th2 (ecc gear angle from tdc) in deg</h6>
+                            <h6>N2 (ecc gear speed) in rpm</h6>
+
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <form>
+                                <legend>
+                                  Output
+                                </legend>
+
+                                <!--{% csrf_token %}-->
+                                {{form_output|crispy}}
+
+                            </form>
+                            <hr>
+                            <h6>Th3 (conrod angle) in deg</h6>
+                            <h6>Fbos (From Bottom Of Stroke) in mm</h6>
+                            <h6>V (Slide velocity) in mm</h6>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- chart column start -->
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="fbos_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var fbos_th2_parsed_data = {{ fbos_th2_data|safe }};
+                                var fbos_th2_chart_data = fbos_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("fbos_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'FBOS Vs CA',
+                                            data: fbos_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#0000FF", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'FBOS Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'FBOS (mm)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="v_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var v_th2_parsed_data = {{ v_th2_data|safe }};
+                                var v_th2_chart_data = v_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("v_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Vel Vs CA',
+                                            data: v_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#ff00ff", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Vel Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Velocity (mm/s)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+
+
+
+
+                <!-- chart column start -->
+                <div class="col-sm-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="acc_th2_cnv" width="100" height="100"></canvas>
+                            <script>
+                                var acc_th2_parsed_data = {{ acc_th2_data|safe }};
+                                var acc_th2_chart_data = acc_th2_parsed_data.xy_data;
+                                var ctx = document.getElementById("acc_th2_cnv").getContext("2d");
+                                var myChart = new Chart(ctx, {
+                                    type: 'scatter',
+                                    plugins: [{
+                                        beforeDraw: chart => {
+                                          var context = chart.ctx;
+                                          context.save();
+                                          var image = new Image();      
+                                          image.src = "{% static 'user_app/my_logo.png' %}";      
+                                          imageSize = 100;
+                                          context.drawImage(image, 
+                                          chart.width/2 - imageSize / 2, chart.height/2 - imageSize / 2, 
+                                          imageSize, imageSize * 0.54);
+                                          context.restore();
+                                        }
+                                      }],
+                                    data: {
+                                        datasets: [{
+                                            label: 'Acc Vs CA',
+                                            data: acc_th2_chart_data,
+                                            pointRadius: 0, //0 to remove marker circles
+                                            showLine: true,  //true to show line when marker circles are removed
+                                            fill: false,  //true to fill the area under curve
+                                            borderColor: "#FFA500", // for main line color
+                                        }],
+                                        
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Acc Vs Crank Angle'
+                                        },
+                                        scales: {
+                                            xAxes: [{
+                                                display: true,  //to display x axis values
+                                                gridLines: {
+                                                display: true, //true to show vertical gridlines. xAxes display must also be true to show gridlines
+                                                color: "#808080",
+                                                lineWidth: 1,
+                                                drawTicks: true
+                                                },
+                                                ticks: {
+                                                //beginAtZero: true, this is to be verified
+                                                min: 0,
+                                                max: 360,
+                                                stepSize: 30
+                                                },
+                                                
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'CA (deg)'
+                                                }
+                                            }],
+                                            yAxes: [{
+                                                display: true,
+                                                gridLines: {
+                                                display: true,
+                                                color: "#808080",
+                                                lineWidth: 1
+                                                },
+                                                scaleLabel: {
+                                                display: true,
+                                                labelString: 'Acceleration (m/s2)'
+                                                }
+                                            }]
+                                        },
+                                        legend: {
+                                            position: 'bottom',
+                                            display: false,
+                                        },
+
+                                    }
+                                });
+
+                            </script>
+                            
+
+
+                        </div>
+                    </div>
+                </div>
+                <!-- chart column ends -->
+
+            </div>
+            <!-- row class ends here -->
+
+
+
+        </div>
+        <!-- main card body ends here -->
+    </div>
+    <!-- main card ends here -->
+</div>
+<!-- container ends here -->
+
+
+{% endblock %}

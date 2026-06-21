@@ -1,0 +1,43 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+<h3>Home for registered users</h3>
+<p>
+    You are currently at home page for registered users.
+    Following calculation apps are available.
+</p>
+<!--<a class="btn btn-primary" href="{% url 'add' %}">add calculation app</a>
+<a class="btn btn-primary" href="{% url 'sub' %}">subtraction calculation app</a>-->
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'rd_torque' %}">RD Torque</a>
+</div>
+<hr>
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'ecc_drive' %}">Ecc Drive</a>
+</div>
+<hr>
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'servo345cv' %}">Servo 345CV</a>
+</div>
+<hr>
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'servo345' %}">Servo 345</a>
+</div>
+<hr>
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'flywheel' %}">Flywheel energy</a>
+</div>
+<hr>
+
+<div class="container">
+    <a class="btn btn-primary" href="{% url 'link_drive' %}">Link Drive</a>
+</div>
+<hr>
+
+
+{% endblock content %}

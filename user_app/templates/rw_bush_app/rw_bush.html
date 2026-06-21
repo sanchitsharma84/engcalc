@@ -1,0 +1,73 @@
+{% extends 'user_app/base.html' %}
+
+{% block content %}
+
+<div class="container">
+
+    <form action="rw_bush_url" method='POST'>
+        {% csrf_token %}
+        <div class="container">
+
+            <div class="row">
+                <h4>Row-wise Hydrodynamic Bush Calculations</h4>
+            </div>
+            <hr>
+
+
+            <div class="row">
+                <div class="col">
+                    <div class="float-end">
+                        <input value="Calculate" type="submit" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row row-cols-5">
+                {% for this_form_in in form_in_lst %}
+                <div class="col text-center">
+                    {{this_form_in.as_p}} 
+                </div>
+                
+                {% endfor %}
+            </div>
+
+        </div>
+
+        <hr>
+
+    </form>
+
+</div>
+
+<div class="container">
+    <h6><b>Notes</b></h6>
+    <ul>
+        <li>This program calculates hydrodynamic bush</li>
+        <li>w is bush load in ton</li>
+        <li>d is bush nominal dia in mm</li>
+        <li>l is bush width in mm</li>
+        <li>clr is diameteral clearance in mm</li>
+        <li>rpm is shaft rpm</li>
+        <li>mu id dynamic viscosity. for ISO VG 150, it is 0.1275 Pa.s</li>
+        <li>Ecc ratio is eccentricity ratio</li>
+        <li>If ecc ratio is 0, shaft is concentric with bush</li>
+        <li>If ecc ratio is 1, shaft touches bush</li>
+        <li>Ecc ratio should not be more than 0.95 for stable and reliable bearing</li>
+        <li>Lesser the ecc ratio, better is the bearing</li>
+        <li>S is the Sommerfeld number. It is used to find value of Ecc ratio</li>
+        <li>phi is the attitude angle in deg</li>
+        <li>flow is the amount of oil required in bush considering load in full cycle</li>
+        <li>film thickness is in microns</li>
+        <li>for Ra 0.1 - 0.2: film thk > 2.5 micron</li>
+        <li>for Ra 0.2 - 0.4: film thk > 6.2 micron</li>
+        <li>for Ra 0.4 - 0.8: film thk > 12.5 micron</li>
+        <li>for Ra 0.8 - 1.6: film thk > 25 micron</li>
+        <li>for Ra 1.6 - 3.2: film thk > 50 micron</li>
+    </ul>
+</div>
+
+<!-- container ends here -->
+
+{% endblock %}
