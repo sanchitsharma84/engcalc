@@ -25,7 +25,12 @@ SECRET_KEY = 'o8_a@%0t#a+w^vf+2y5@1ap6$_ly*m!u0v#(jl6&gj03w0=-i2'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.235.86.204']
+ALLOWED_HOSTS = [
+'13.233.55.113',
+'engcalc.in',
+'www.engcalc.in',
+'localhost',
+'127.0.0.1',]
 
 
 # Application definition
