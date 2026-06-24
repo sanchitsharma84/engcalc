@@ -21,7 +21,8 @@ from django.conf.urls import url
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
+    path('this_site_administrator/', admin.site.urls),
     path('', include('user_app.urls')),
     path('add_app/', include('add_app.urls')),
     path('sub_app/', include('sub_app.urls')),

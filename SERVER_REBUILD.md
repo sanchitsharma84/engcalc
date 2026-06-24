@@ -49,22 +49,24 @@ Python 3.11.x
 
 ## Database
 
-Database file:
+Database file: db.sqlite3
 
-```text
-db.sqlite3
-```
+Contains:
 
-Purpose:
+Django authentication tables
+User accounts and permissions
+Permissions
+Sessions
+SmallServoMotor master table (11 servo motor records)
 
-* Django authentication
-* User accounts
-* Permissions
-* Sessions
+Does NOT contain:
 
-No engineering calculation data is stored in the database.
+Calculation history
+User projects
+Engineering reports
+Uploaded files
 
-The application is essentially stateless.
+The application is largely stateless and most calculations are performed directly in Python without database storage.
 
 ---
 
